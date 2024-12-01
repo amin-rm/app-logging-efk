@@ -16,6 +16,11 @@ logger = logging.getLogger('fluentd')
 logger.setLevel(logging.INFO)
 logger.addHandler(fluent_handler)
 
+log_data = {"message": "Test log for Fluentd"}
+print(json.dumps(log_data))  # Ensure data is JSON-serializable
+logger.info(log_data)
+
+
 # Log each request to Fluentd
 @app.before_request
 def log_request():
@@ -25,6 +30,7 @@ def log_request():
         'remote_addr': request.remote_addr
     })
 
+
 # Authenticate users
 @auth.get_password
 def get_password(username):
@@ -32,9 +38,11 @@ def get_password(username):
         return 'python'
     return None
 
+
 @auth.error_handler
 def unauthorized():
     return make_response(jsonify({'error': 'Unauthorized access'}), 401)
+
 
 # Load student age data
 try:
@@ -45,11 +53,13 @@ except KeyError:
 with open(student_age_file_path, "r") as student_age_file:
     student_age = json.load(student_age_file)
 
+
 # Routes
 @app.route('/pozos/api/v1.0/get_student_ages', methods=['GET'])
 @auth.login_required
 def get_student_ages():
     return jsonify({'student_ages': student_age})
+
 
 @app.route('/pozos/api/v1.0/get_student_ages/<student_name>', methods=['GET'])
 @auth.login_required
@@ -62,9 +72,11 @@ def get_student_age(student_name):
         json.dump(student_age, student_age_file, indent=4, ensure_ascii=False)
     return jsonify({student_name: age})
 
+
 @app.errorhandler(404)
 def not_found(error):
     return make_response(jsonify({'error': 'Not found'}), 404)
+
 
 # Main execution
 if __name__ == '__main__':
