@@ -1,0 +1,54 @@
+version: '3'
+services:
+  api:
+    build: .
+    image: pozos-api
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./:/data
+    networks:
+      - student_network
+
+  website:
+    image: php:apache
+    environment:
+      USERNAME: toto
+      PASSWORD: python
+    ports:
+      - "80:80"
+    volumes:
+      - ../website:/var/www/html
+    depends_on:
+      - api
+    networks:
+      - student_network
+  registry:
+    image: registry:2
+    container_name: docker-registry
+    ports:
+      - "5001:5000"
+    environment:
+      - REGISTRY_AUTH=htpasswd
+      - REGISTRY_AUTH_HTPASSWD_PATH=/auth/registry.password
+      - REGISTRY_AUTH_HTPASSWD_REALM=Registry Realm
+    volumes:
+      - ./registry/auth:/auth
+      - ./registry/data:/var/lib/registry
+    networks:
+      - student_network
+  registry-ui:
+    image: joxit/docker-registry-ui:latest
+    container_name: registry-ui
+    environment:
+      - REGISTRY_TITLE=POZOS Docker Registry
+      - REGISTRY_URL=http://registry:5000
+    ports:
+      - "8080:80"
+    depends_on:
+      - registry
+    networks:
+      - student_network
+networks:
+  student_network:
+

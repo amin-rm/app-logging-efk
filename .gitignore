@@ -1,0 +1,2 @@
+docker-compose-efk/elasticsearch/data/*
+docker-compose-efk/kibana/data/*
